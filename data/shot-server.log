@@ -1,0 +1,6 @@
+▲ Next.js 16.4.3
+- Local:         http://localhost:3101
+- Network:       http://192.168.1.14:3101
+✓ Ready in 210ms
+✓ Running next.config.ts took 58ms
+{"ts":"2026-10-26T08:37:39.258Z","event":"chat_done","session":"b3f09a46","mode":"mock","latencyMs":64,"products":5,"handoff":false,"messageChars":27}

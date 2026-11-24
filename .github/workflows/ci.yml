@@ -1,0 +1,70 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint · Typecheck · Test · Build · Eval
+    runs-on: ubuntu-latest
+    env:
+      # CI không gọi Gemini: chạy offline để tất định và không tốn hạn mức
+      LLM_MODE: mock
+      ADMIN_PASSWORD: ci-admin-password
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+      - name: Seed dữ liệu demo
+        run: npm run seed
+
+      - run: npm run build
+      - run: npm run eval:search
+      - run: npm run eval:chat
+
+  e2e:
+    name: Playwright smoke
+    runs-on: ubuntu-latest
+    env:
+      LLM_MODE: mock
+      ADMIN_PASSWORD: ci-admin-password
+      DATABASE_PATH: ${{ github.workspace }}/data/kidohomes.db
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run seed
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+      - name: Lưu kết quả khi lỗi
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

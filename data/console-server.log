@@ -1,0 +1,6 @@
+▲ Next.js 16.4.3
+- Local:         http://localhost:3103
+- Network:       http://192.168.1.14:3103
+✓ Ready in 171ms
+✓ Running next.config.ts took 45ms
+{"ts":"2026-10-26T08:53:25.775Z","event":"search_done","latencyMs":20,"results":8,"closest":5,"queryChars":20}

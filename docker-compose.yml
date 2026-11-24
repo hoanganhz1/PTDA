@@ -1,0 +1,30 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # Đặt LLM_MODE=live + GEMINI_API_KEY để bật tư vấn bằng Gemini
+      LLM_MODE: ${LLM_MODE:-mock}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      GEMINI_THINKING_LEVEL: ${GEMINI_THINKING_LEVEL:-medium}
+      GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-2200}
+      GEMINI_TIMEOUT_MS: ${GEMINI_TIMEOUT_MS:-35000}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-demo-admin}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Kidohomes Demo}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      DATABASE_PATH: /app/data/kidohomes.db
+    volumes:
+      # Giữ yêu cầu liên hệ + lịch sử chat qua các lần restart
+      - kidohomes-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:'bồn cầu'})}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  kidohomes-data:
